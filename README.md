@@ -5,7 +5,7 @@ Inspired by the various counter and clock projects like this one:
 
 https://makezine.com/projects/convert-pinball-score-reel-clock/
 
-...and the Gotleib Decagon Score Reels of the '70s:
+...and the Gottlieb Decagon Score Reels of the '70s:
 
 https://youtu.be/1tYzWID41jc
 
