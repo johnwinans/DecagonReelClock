@@ -47,7 +47,8 @@ wheel_thickness=3;  // how thick the reel hub shiuld be
 wheel_axel_bore_diameter=5.4;  // the size of the hole in the hub (for the axle)
 
 
-
+wheel_axel_bearing_diameter=6.7;
+bearing_height=3;
 
 
 //reel();                         // <---------------  Render the entire reel
@@ -57,8 +58,16 @@ wheel_axel_bore_diameter=5.4;  // the size of the hole in the hub (for the axle)
 //reelTop();                      // <--------------- Render the top only
 
 
-
-
+//testBearingCountersink();
+module testBearingCountersink()
+{
+    difference()
+    {
+        cylinder(d=15, h=10, $fn=30);
+        translate([0,0,10-bearing_height+.001]) cylinder(d=wheel_axel_bearing_diameter, h=bearing_height, $fn=30);
+        translate([0,0,-.5]) cylinder(d=wheel_axel_bore_diameter, h=wheel_height+1, $fn=30);   
+    }
+}
 
 /**
 * A 'blob' with a hexagonal hole suitable for holding an M3 nyloc
@@ -149,6 +158,11 @@ module reel()
                 cylinder(d=m3BoltDia, h=100, $fn=20);
                 translate([0,0,8+5]) cylinder(d=m3nutDia, h=100, $fn=6);
             }
+            
+        // Bearings
+        translate([0,0,-.001]) cylinder(d=wheel_axel_bearing_diameter, h=bearing_height, $fn=30);
+        translate([0,0,wheel_height-bearing_height+.001]) cylinder(d=wheel_axel_bearing_diameter, h=bearing_height, $fn=30);
+
     }
 }
 
@@ -185,6 +199,7 @@ module wheel()
         
         // the axel bore
         translate([0,0,-.5]) cylinder(d=wheel_axel_bore_diameter, h=wheel_height+1, $fn=30);   
+        
     }
     
     rotate([0,0,-360/20]) translate([wheel_dia/2-15,0,0]) magnetRetainer(); // index magnet
