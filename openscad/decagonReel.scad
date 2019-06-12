@@ -47,13 +47,13 @@ wheel_thickness=3;  // how thick the reel hub shiuld be
 wheel_axel_bore_diameter=5.4;  // the size of the hole in the hub (for the axle)
 
 
-wheel_axel_bearing_diameter=6.7;
+wheel_axel_bearing_diameter=6.6;
 bearing_height=3;
 
 
 //reel();                         // <---------------  Render the entire reel
 
-//rotate([180,0,0]) reelBottom(); // <--------------- Render the bottom only
+rotate([180,0,0]) reelBottom(); // <--------------- Render the bottom only
 
 //reelTop();                      // <--------------- Render the top only
 
