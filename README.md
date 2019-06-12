@@ -1,7 +1,8 @@
 # DecagonReelClock
-Design files for a 3D printed decagon reel clock
+Design files for a 3D printed decagon reel clock.  Project files include a 2-part 
+decagon reel, drive gear, mounting bracket and printable digits to glue onto the reels.
 
-Inspired by the various counter and clock projects like this one:
+Inspired by various pinball counter and clock projects like this one:
 
 https://makezine.com/projects/convert-pinball-score-reel-clock/
 
@@ -9,14 +10,12 @@ https://makezine.com/projects/convert-pinball-score-reel-clock/
 
 https://youtu.be/1tYzWID41jc
 
+![Decagon Back](/openscad/decagonReel-bottom.png)
 
-Index magnets www.amazon.com ASIN: B07CPMQJHF
+Part suppliers:
 
-Bearings www.amazon.com ASIN: B00ZHSQX42
-
-Axle www.amazon.com ASIN: B00JR56KI0
-
-Stainless steel M3 bolts: www.asmc.net 0000-102370
-
-NYLOC nuts: www.asmc.net 0000-102035
-
+* Index magnets www.amazon.com ASIN: B07CPMQJHF
+* Bearings www.amazon.com ASIN: B00ZHSQX42
+* 3mmx150mm Axle www.amazon.com ASIN: B00JR56KI0
+* Stainless steel M3 bolts: www.asmc.net 0000-102370
+* NYLOC nuts: www.asmc.net 0000-102035
