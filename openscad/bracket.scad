@@ -88,7 +88,7 @@ module mountingBracket()
     
         // wheel axle hole
         translate([wallthickness/2+.002,0,120]) axleNeg();
-     #   translate([0,0,120]) rotate([90,0,-90]) m3GrubHubNeg(hubZ=wallthickness);
+        translate([0,0,120]) rotate([90,0,-90]) m3GrubHubNeg(hubZ=wallthickness);
         
         translate([wallthickness/2+.002,0,120-axleSpacing-axleFudge]) nmea17Neg();
             
