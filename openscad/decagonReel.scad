@@ -40,22 +40,29 @@ $fa=2;    // render high quality for printing (takes a minute to compile!)
 m3nutDia=6.6;       // The diameter of the hex point-to-point on an M3 nut
 m3BoltDia=3.4;      // the diameter of an M3 bolt shaft hole
 
-wheel_dia=200;      // outer diameter of the reel
-wheel_height=50;    // how wide the reel will be (or the height when printing it sideways)
-wheel_thickness=3;  // how thick the reel hub shiuld be
+// outer diameter of the reel
+wheel_dia=140;    // 140mm decagon for 140mm print beds
+//wheel_dia=200;      // bigger decagon for larger print beds (like TAZ)
+
+wheel_height=wheel_dia/4;    // how wide the reel will be (or the height when printing it sideways)
+wheel_thickness=4;  // how thick the reel hub should be
 
 wheel_axel_bore_diameter=5.4;  // the size of the hole in the hub (for the axle)
 
 
-wheel_axel_bearing_diameter=6.6;
+wheel_axel_bearing_diameter=6.4;
 bearing_height=3;
 
+facetHeight = cos(((10-2)*180)/10/2)*(wheel_dia/2)*2;
+echo("wheel_height=", wheel_height, "facet=", facetHeight);
 
 //reel();                         // <---------------  Render the entire reel
 
-rotate([180,0,0]) reelBottom(); // <--------------- Render the bottom only
+//rotate([180,0,0]) reelBottom(); // <--------------- Render the bottom only
 
-//reelTop();                      // <--------------- Render the top only
+reelTop();                      // <--------------- Render the top only
+
+
 
 
 //testBearingCountersink();
@@ -119,6 +126,12 @@ module reelBottom()
 ***********************************************************************/
 module reel()
 {
+    // gearTeeth=60;
+    gearTeeth=32;
+    
+    // how far from the center to drill the bolt holes
+    boltRad=wheel_dia/2-wheel_thickness-4;
+    
     difference()
     {
         union()
@@ -126,43 +139,54 @@ module reel()
             wheel();
     
             // 60 teeth = 6 teeth/digit
-            // 200 steps/rev 
-            // 10-tooth drive dear = 200/10 steps/tooth = 20
-            // 20*6 = 180 steps/digit
             mygear($fn=20,
-                number_of_teeth=60, 
+                number_of_teeth=gearTeeth, 
                 bore_diameter=wheel_axel_bore_diameter,
                 hub_thickness=0,
                 rim_thickness = 8,      // how thick the 'tire' of the gear will be
                 gear_thickness = 8      // how thick the inner-wheel will be
                 );
             
-            // add some blobs that we can hollow out to use for nut-holders
-            for ( t = [ 18 : 72 : 360 ] )
-                rotate([0,0,t]) translate([85,0,8+5]) scale([1,1,.5]) sphere(r=10);
-            
+            // add some material that we can hollow out to use for nut-holders
+            for ( t = [ 0 : 72 : 360 ] )
+                rotate([0,0,t]) translate([boltRad,0,8+5]) 
+                    cylinder(d=m3BoltDia+8, h=5);
         }
-    
-        // put relief holes around the bottom gear and hub
-        for ( t = [ 0 : 36 : 360 ] )
-            rotate([0,0,t]) translate([73,0,0]) cylinder(d=35, h=100);
+        
+        // index magnet mounting hole
+        if(false)
+            rotate([0,0,-360/10]) translate([pitch_radius(gearTeeth)-6,0,-.001]) cylinder(d=7, h=2.1, $fn=20);
+
+
+        // put relief holes around the hub (if it is big enough)
+        for ( t = [ 18 : 36 : 360 ] )
+            rotate([0,0,t]) translate([wheel_dia/3,0,0]) cylinder(d=wheel_dia/6, h=100, $fn=30);
+
+        // hollow out the gear
         for ( t = [ 0 : 72 : 360 ] )
-            rotate([0,0,t]) translate([25,0,-.1]) cylinder(d=24, h=100);
+            rotate([0,0,t]) translate([pitch_radius(gearTeeth)*.57,0,-.1]) cylinder(d=pitch_radius(gearTeeth)/2, h=100, $fn=30);        
         
-        
-        // add some bolt holes to attach the top & bottom together
-        // bolt holes
-        for ( t = [ 18 : 72 : 360 ] )
-            rotate([0,0,t]) translate([85,0,0]) 
+        // some bolt holes to attach the top & bottom together 
+        for ( t = [ 0 : 72 : 360 ] )
+
+            rotate([0,0,t]) translate([boltRad,0,0]) 
             {
-                cylinder(d=m3BoltDia, h=100, $fn=20);
-                translate([0,0,8+5]) cylinder(d=m3nutDia, h=100, $fn=6);
+                cylinder(d=m3BoltDia, h=100, $fn=20);   // the bolt hole
+                cylinder(d=m3BoltDia+4, h=8, $fn=20);   // head countersink
+                translate([0,0,8+5]) cylinder(d=m3nutDia, h=100, $fn=6);    // nut countersink
             }
             
-        // Bearings
+        // axle bearings
         translate([0,0,-.001]) cylinder(d=wheel_axel_bearing_diameter, h=bearing_height, $fn=30);
         translate([0,0,wheel_height-bearing_height+.001]) cylinder(d=wheel_axel_bearing_diameter, h=bearing_height, $fn=30);
 
+    }
+    
+    // index magnet mounting hole
+    difference()
+    {
+        rotate([0,0,-360/10]) translate([boltRad,0,0]) cylinder(d=m3BoltDia+8, h=8, $fn=20);
+        rotate([0,0,-360/10]) translate([boltRad,0,-.001]) cylinder(d=7, h=2.1, $fn=20);
     }
 }
 
@@ -176,7 +200,7 @@ module wheel()
 
     difference()
     {
-        cylinder(d=wheel_dia, h=wheel_height, $fn=10);//=360/10);
+        cylinder(d=wheel_dia, h=wheel_height, $fn=10);
 
         // hollow out the top
         translate([0,0,5+5+8]) 
@@ -199,30 +223,16 @@ module wheel()
         
         // the axel bore
         translate([0,0,-.5]) cylinder(d=wheel_axel_bore_diameter, h=wheel_height+1, $fn=30);   
-        
-    }
-    
-    rotate([0,0,-360/20]) translate([wheel_dia/2-15,0,0]) magnetRetainer(); // index magnet
-}
-
-/**
-* A mount for a magnet used for a 0-digit index.
-***********************************************************************/
-module magnetRetainer()
-{
-    difference()
-    {
-        cylinder(d=16, h=8);
-        translate([0,0,-.001]) cylinder(d=7, h=2, $fn=20);
     }
 }
-
 
 
 
 /**
 * A wrapper for rendering a gear.
 ***********************************************************************/
+circular_pitch=268;
+
 module mygear(
     number_of_teeth = 48,
     gear_thickness = 5,
@@ -232,10 +242,8 @@ module mygear(
     hub_diameter = 10,
     bore_diameter = 6)
 {
-    difference()
-    {
     gear (number_of_teeth=number_of_teeth,
-        circular_pitch=268,
+        circular_pitch=circular_pitch,
         gear_thickness = gear_thickness,
         rim_thickness = rim_thickness,
         rim_width = rim_width,
@@ -246,5 +254,7 @@ module mygear(
         twist = 0,
         involute_facets = 12,
         circle_facets = 7);    
-    }
 }
+
+function pitch_radius(number_of_teeth, circular_pitch=circular_pitch) = (number_of_teeth * circular_pitch / 180) / 2;
+

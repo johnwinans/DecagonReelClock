@@ -14,9 +14,11 @@ https://youtu.be/1tYzWID41jc
 
 Part suppliers:
 
-* Index magnets www.amazon.com ASIN: B07CPMQJHF
-* Bearings www.amazon.com ASIN: B00ZHSQX42
-* NEMA 17 stepper motors www.amazon.com ASIN: B07582D2R8
-* 3mm x 150mm Axles www.amazon.com ASIN: B00JR56KI0
-* Stainless steel M3 bolts: www.asmc.net 0000-102370
-* M3 NYLOC nuts: www.asmc.net 0000-102035
+* NEMA 17 stepper motors amazon.com ASIN: B07582D2R8
+* 3mm x 150mm axles amazon.com ASIN: B00JR56KI0
+* 3mm bearings amazon.com ASIN: B00ZHSQX42
+* Index magnets amazon.com ASIN: B07CPMQJHF
+* M3 bolts: asmc.net 0000-102370
+* M3 NYLOC nuts: asmc.net 0000-102035
+* M3 grub screws amazon.com ASIN: B07792FFJV
+* M3 washers amazon.com ASIN: B000FN15YM

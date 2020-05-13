@@ -34,10 +34,16 @@ function pitch_radius(number_of_teeth, circular_pitch) = (number_of_teeth * circ
 BearingOD=10.5;
 BearingThickness=4;
 
-axleFudge = .25;     // extra space to deal with imperfect gear teeth
+//axleFudge = .1;     // extra space to deal with imperfect gear teeth
+axleFudge = 0;     // extra space to deal with imperfect gear teeth
 
-// 60 teeth hath the wheel & 8 hath the driver gear
-axleSpacing = pitch_radius(68, circular_pitch) + axleFudge;
+
+// 60 teeth hath the wheel & 8 hath the driver gear for 200mm reels
+//axleSpacing = pitch_radius(68, circular_pitch) + axleFudge;
+// 32+12 teeth for 140mm reels
+axleSpacing = pitch_radius(46, circular_pitch) + axleFudge;
+
+
 
 echo("axle spacing=", axleSpacing);
 
@@ -46,13 +52,15 @@ mountingBracket();
 
 module mountingBracket()
 {
+    wheel_thickness = 4;
+    
     wallCornerRad = 15;
-    wallthickness = 13;
+    wallthickness = 10; // 13=NEMA17, 10=28BYJ-48
     wallWidth = 75;
     wallHeight = 130;
-    wheel_dia = 200;
+    wheel_dia = 140;    // NEMA17 = 200;
     footWidth = 50;
-    
+    sensorRadius = wheel_dia/2-wheel_thickness-4;   // NEMA17 = wheel_dia/2-15; 
     
     difference()
     {
@@ -89,13 +97,16 @@ module mountingBracket()
         // wheel axle hole
         translate([wallthickness/2+.002,0,120]) axleNeg();
         translate([0,0,120]) rotate([90,0,-90]) m3GrubHubNeg(hubZ=wallthickness);
-        
-        translate([wallthickness/2+.002,0,120-axleSpacing-axleFudge]) nmea17Neg();
+                   
+        translate([wallthickness/2+.002,0,120-axleSpacing-axleFudge]) motorNeg();
+                
+        // access hole for the grub on the motor gear
+        translate([0,0,120-axleSpacing-axleFudge]) rotate([90,0,0]) cylinder(d=6, h=100, $fn=20);
             
         // The index sensor hole (2x5 flat package)
         translate([-(wallthickness/2+.002),0,120]) // axle center
             rotate([-360/20,0,0]) 
-                translate([0,0,-(wheel_dia/2-15)])
+                translate([0,0,-(sensorRadius)])
                 {
                     translate([0,0,-3]) cube([4,5,15], center=true);
                     translate([0,0,2]) rotate([0,90,0]) cylinder(d=4, h=40, center=true, $fn=20);
@@ -105,6 +116,7 @@ module mountingBracket()
 
 
     }
+    translate([wallthickness/2+.002,0,120-axleSpacing-axleFudge]) motorPos();
 }
 
 axleDia=3.5;
@@ -141,6 +153,70 @@ module m3GrubHubNeg(axle=axleDia, hubZ, hubRad=M3SqNutHt*4)
 }
 
 
+module motorNeg()
+{
+    //nmea17Neg();
+    stepper28byj48Neg();
+}
+
+module motorPos()
+{
+    stepper28byj48Pos();
+}
+
+module stepper28byj48Neg()
+{
+    bracketOffset = 8;          // mounting hols are 87mm offset from center of shaft
+    bracketSpacing = 35/2;      // mounting holes spacing is 35mm on center
+    
+    rotate([0,90,0]) cylinder(d=25, h=100, center=true, $fn=30);
+
+    translate([0,0,-bracketOffset])
+    {
+        for ( y = [ -bracketSpacing, bracketSpacing ])
+        {
+            // bolt holes
+            translate([0,y,0]) rotate([0,-90,0]) cylinder(d=3.8, h=100, center=false, $fn=30);
+            // countersinks
+            translate([-5, y, 0]) rotate([0,-90,0]) cylinder(d=6.5, h=100, center=false, $fn=30);
+            // guides to align the motor on center if use bolts that are too small
+//#            translate([0,y,-bracketWith/2-1]) cube([2,4,2], center=true);
+        }
+        //#slottedNotch();
+    }
+}
+module stepper28byj48Pos()
+{
+    bracketOffset = 8;
+    translate([0,0,-bracketOffset]) slottedNotch();
+}
+
+
+// A slotted notch for guiding a 28byj-48 stepper mounting bracket
+module slottedNotch()
+{
+    bracketSpacing = 35/2;      // offset from center to the bracket mounting holes
+    bracketWith = 7.2;          // the width of the mounting brackets 
+    bracketLength = 42;         // the total outer length of the brackets
+    motorHousingDiameter = 29;
+    
+    difference()
+    {
+        hull()
+        {
+            translate([0,bracketSpacing,0]) rotate([0,90,0]) cylinder(d=bracketWith+6, h=2, center=true, $fn=30);
+            translate([0,-bracketSpacing,0]) rotate([0,90,0]) cylinder(d=bracketWith+6, h=2, center=true, $fn=30);
+        }
+
+    //    cube([2,bracketLength+4,bracketWith+4], center=true);
+        hull()
+        {
+            translate([0,bracketSpacing,0]) rotate([0,90,0]) cylinder(d=bracketWith, h=3, center=true, $fn=30);
+            translate([0,-bracketSpacing,0]) rotate([0,90,0]) cylinder(d=bracketWith, h=3, center=true, $fn=30);
+        }
+        cube([10,motorHousingDiameter,bracketWith+10], center=true);
+    }
+}
 
 // the parts that require cutting away to mount a nema17 motor
 module nmea17Neg()
