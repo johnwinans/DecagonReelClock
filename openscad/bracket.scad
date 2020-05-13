@@ -57,7 +57,7 @@ module mountingBracket()
     wallCornerRad = 15;
     wallthickness = 10; // 13=NEMA17, 10=28BYJ-48
     wallWidth = 75;
-    wallHeight = 130;
+    wallHeight = 95;   // larger wheel = 130;
     wheel_dia = 140;    // NEMA17 = 200;
     footWidth = 50;
     sensorRadius = wheel_dia/2-wheel_thickness-4;   // NEMA17 = wheel_dia/2-15; 
@@ -95,16 +95,16 @@ module mountingBracket()
         translate([0,0,-5-(wallCornerRad+50)/2]) cube([wallthickness+50, wallWidth+50, wallCornerRad+50], center=true);
     
         // wheel axle hole
-        translate([wallthickness/2+.002,0,120]) axleNeg();
-        translate([0,0,120]) rotate([90,0,-90]) m3GrubHubNeg(hubZ=wallthickness);
+        translate([wallthickness/2+.002,0,wallHeight-10]) axleNeg();
+        translate([0,0,wallHeight-10]) rotate([90,0,-90]) m3GrubHubNeg(hubZ=wallthickness);
                    
-        translate([wallthickness/2+.002,0,120-axleSpacing-axleFudge]) motorNeg();
+        translate([wallthickness/2+.002,0,wallHeight-10-axleSpacing-axleFudge]) motorNeg();
                 
         // access hole for the grub on the motor gear
-        translate([0,0,120-axleSpacing-axleFudge]) rotate([90,0,0]) cylinder(d=6, h=100, $fn=20);
+        translate([0,0,wallHeight-10-axleSpacing-axleFudge]) rotate([90,0,0]) cylinder(d=6, h=100, $fn=20);
             
         // The index sensor hole (2x5 flat package)
-        translate([-(wallthickness/2+.002),0,120]) // axle center
+        translate([-(wallthickness/2+.002),0,wallHeight-10]) // axle center
             rotate([-360/20,0,0]) 
                 translate([0,0,-(sensorRadius)])
                 {
@@ -116,7 +116,7 @@ module mountingBracket()
 
 
     }
-    translate([wallthickness/2+.002,0,120-axleSpacing-axleFudge]) motorPos();
+    translate([wallthickness/2+.002,0,wallHeight-10-axleSpacing-axleFudge]) motorPos();
 }
 
 axleDia=3.5;
