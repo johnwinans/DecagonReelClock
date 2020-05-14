@@ -1,6 +1,8 @@
 %!PS
 
-% Copyright (C) 2019  John Winans
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Copyright (C) 2019, 2020  John Winans
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -14,48 +16,260 @@
 %
 % You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <https://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Print the numbers for a decagon score reel
+%
 % Official source and documentation:
 %     https://github.com/johnwinans/DecagonReelClock
+%
+% A video series discussing Postscript programming and this project:
+%     https://www.youtube.com/watch?v=5c0De1pHJ0U&list=PL3by7evD3F527t79cHU0Ki8anStBmCci2
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-% Print the numbers for a score reel
-
-% A procedure to convert from mm to points
-% stack: n  ->  n
 /in { 72 mul } def
-
-% A procedure to convert from mm to points
-% stack: n  ->  n
 /mm { 2.83465 mul } def
 
-/PageMarginY .75 in def		% bottom page margin
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Pick a reel diameter that matches the 3D printed size:
+%
+
+/ReelDia { 140 mm } def
+%/ReelDia { 200 mm } def
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Calculate the facet height to match the 3D printed design:
+% facetHeight = cos(((10-2)*180)/10/2)*(wheel_dia/2)*2;
+%
+/FacetHt {
+	10 2 sub
+	180 mul
+	10 div
+	2 div
+	cos
+	ReelDia 2 div
+	mul
+	2 mul
+} def
+
+
+/FacetWidth {
+	ReelDia 4 div
+} def
+
+/FontSize { ReelDia 2.7 div } def
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% for letter size paper
+/PageHeight	{ 11 in } def
+/PageWidth	{ 8.5 in } def
+
+/PageMarginY .5 in def		% bottom page margin
 /PageMarginX .25 in def		% left page margin
-/PaddingX 10 def			% tweak the numbers into the center of the strip
-/ReelWidth 51 mm def		% the outside width of the reel
 
-/FacetHt 62 mm def			% height of the facets on the reel 
 
-/NewCenturySchlbk-Bold findfont 75 mm scalefont setfont
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Figure out how many digits we can fit on each strip.
+/DigitsPerStrip { PageHeight PageMarginY 2 mul sub FacetHt div cvi } def
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Pick your Favorite font:
+%
+
+/Bookman-Demi findfont FontSize scalefont setfont
+
+%/NewCenturySchlbk findfont FontSize scalefont setfont
+%/NewCenturySchlbk-Bold findfont FontSize scalefont setfont
+%/Courier-Bold findfont FontSize scalefont setfont
+%/Helvetica-Bold findfont FontSize scalefont setfont
+%/AvantGarde-Book findfont FontSize scalefont setfont
+%/Palatino-Bold findfont FontSize scalefont setfont
+%/Times-Bold findfont FontSize scalefont setfont
+%/ZapfChancery-MediumItalic findfont FontSize scalefont setfont
+%/Symbol findfont FontSize scalefont setfont
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% a fiducial-drawing subroutine
+% stack: x y  --> -
+/Fiducial {
+    newpath
+	.01 setlinewidth
+    2 copy              % x y x y
+    10 0 360 arc        % x y
+    moveto              % -
+    0 -20 rmoveto       % move to bottom of vertical line
+    0 40 rlineto        % vertical cross-hair
+    -20 -20 rmoveto     % move to left end of horizontal crosshair 
+    40 0 rlineto        % horizontal crosshair
+    stroke
+} def
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% draw a box
+% stack: llx lly urx ury  -->  -
+/Box {
+                    % want:  llx lly urx lly urx ury llx ury
+    1 index         % llx lly urx ury urx
+    3 index         % llx lly urx ury urx lly
+    4 2 roll        % llx lly urx lly urx ury
+    5 index         % llx lly urx lly urx ury llx
+    1 index         % llx lly urx lly urx ury llx ury
+
+    newpath
+    moveto          % llx lly urx lly urx ury
+    lineto          % llx lly urx lly
+    lineto          % llx lly
+    lineto          % -
+    closepath       % -
+
+    stroke          % -
+} def
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% stack: llx lly urx ury  --> -
+/DrawBbox {
+
+	.6 .6 1 setrgbcolor % 		light blue
+	5 setlinewidth      %		Illustrate that a drawn line is centered on the path
+	Box                 %		Draw a blue box around the text path
+} def
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Move to a location in the current path then
+% push a string and call this to return a bounding box:
+% stack: s  --> llx lly urx ury
+/bbox {
+	false charpath      %		append the path of character glyph outlines to the path
+	flattenpath         %		convert curves to sequences of straight lines for pathbbox
+                    	%		pathbox would be confused by curve control points
+	pathbbox            % llx lly urx ury     put ll and ur coordinates on the stack
+} def
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% print the string such that its bounding box is centered in
+% the given bounding box.
+% stack: s llx lly urx ury  -->  -
+/showcenter
+{
+	3 index						% s llx lly urx ury llx
+	3 index 					% s llx lly urx ury llx lly
+	moveto						% s llx lly urx ury
+	4 index						% s llx lly urx ury s
+	bbox						% s llx lly urx ury sllx slly surx sury
+
+%	4 copy			% XXX
+%	DrawBbox		% XXX		% s llx lly urx ury sllx slly surx sury
+
+	3 -1 roll					% s llx lly urx ury sllx surx sury slly
+	add 2 div					% s llx lly urx ury sllx surx scy
+	3 1 roll					% s llx lly urx ury scy sllx surx
+	add 2 div					% s llx lly urx ury scy scx
+	exch						% s llx lly urx ury scx scy
+
+%	2 copy			% XXX
+%	0 1 0 setrgbcolor
+%	Fiducial		% XXX center of string
+
+	5 index 					% s llx lly urx ury scx scy llx
+	4 index						% s llx lly urx ury scx scy llx urx
+	add 2 div					% s llx lly urx ury scx scy fcx
+	5 index						% s llx lly urx ury scx scy fcx lly
+	4 index						% s llx lly urx ury scx scy fcx lly ury
+	add 2 div					% s llx lly urx ury scx scy fcx fcy
+	
+	6 -2 roll					% s llx lly scx scy fcx fcy urx ury
+	pop pop						% s llx lly scx scy fcx fcy
+
+%	% plot a marker at the facet center
+%	2 copy				% XXX
+%	1 0 0 setrgbcolor	% XXX
+%	Fiducial			% XXX
+
+	
+	3 -1 roll					% s llx lly scx fcx fcy scy
+	sub							% s llx lly scx fcx dcy
+	3 1 roll					% s llx lly dcy scx fcx
+	exch sub					% s llx lly dcy dcx
+	4 -1 roll					% s lly dcy dcx llx
+	add							% s lly dcy tx
+	3 1 roll					% s tx lly dcy
+	add							% s tx ty
+
+	moveto						% s
+	0 setgray					% s
+	show						% -			print the digit on the page
+
+} def
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 % Create a numerig string for each digit and print it on the page
 0 1 9 {
-	dup				% i i				% save a copy for later
-	9 exch sub		% i 9-i				% reverse order of the display from 0-9 to 9-0
-	1 string cvs	% i (i)				% create the string we want to show
-	exch			% (i) i				% bury the string for later
-    dup             % (i) y x			% replicate the i to calc x and y positions
-    4 div floor     % (i) y floor(x/4)	% x position is either 0, 1, 2 or 3
-    ReelWidth mul   % (i) y x			% x = x * ReelWidth
-    PageMarginX add % (i) x += margin	% account for the page margin
-	PaddingX add	% (i) x += padding	% fudge position to center it on the strip 
-    exch            % (i) x y			% done with x, prepare to calculate y
-    4 mod           % (i) x (y%4)		% y position depends on the digit
-    FacetHt mul		% (i) x (y*FacetHt)	% calc the digit's vertical position
-    PageMarginY add % (i) x (y+PageMarginY)	% account for the page margin
-    moveto			% (i)				% position to render the digit string
-    show			% -					% print the digit on the page
+	dup							% i i				% save a copy for later
+	9 exch sub					% i 9-i				% reverse order of the display from 0-9 to 9-0
+	1 string cvs				% i (i)				% create the string we want to show
+	exch						% (i) i				% bury the string for later
+    dup             			% (i) y x			% replicate the i to calc x and y positions
+    DigitsPerStrip div floor	% (i) y floor(x/#)	% x position is either 0, 1, 2 or 3
+    FacetWidth mul				% (i) y x			% x = x * FacetWidth
+    PageMarginX add				% (i) x += margin	% account for the page margin
+    exch						% (i) x y			% done with x, prepare to calculate y
+    DigitsPerStrip mod			% (i) x (y%#)		% y position depends on the digit
+    FacetHt mul					% (i) x (y*FacetHt)	% calc the digit's vertical position
+    PageMarginY add 			% (i) x (y+PageMarginY)	% account for the page margin
+
+%2 copy 0 setgray Fiducial
+	.1 setlinewidth newpath dup 0 exch moveto 800 0 rlineto stroke
+
+	% push urx & ury
+	1 index						% (i) x y x
+	FacetWidth add				% (i) x y urx
+	1 index						% (i) x y urx y
+	FacetHt add					% (i) x y urx ury
+	showcenter					% -
+
 } for
+
+
+
+
 
 
 % add some hairline fiducials so we know where to cut the strips
@@ -67,7 +281,7 @@
 % fiducials
 0 1 3 {
     newpath			% i
-    51 mm mul		% i*51mm	Calculate the X position
+    FacetWidth mul	% i*51mm	Calculate the X position
     PageMarginX add	% x			Adjust for the left page margin
     dup				% x x		Save a copy for the top hairline
     0 moveto		% x			Move to mark the bottom hairline
@@ -79,5 +293,6 @@
     0 -25 rlineto	% -			Draw a line downward 25 points
     stroke			% -			Draw it on the page
 } for
+
 
 showpage
