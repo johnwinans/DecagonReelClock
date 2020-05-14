@@ -47,10 +47,10 @@ wheel_dia=140;    // 140mm decagon for 140mm print beds
 wheel_height=wheel_dia/4;    // how wide the reel will be (or the height when printing it sideways)
 wheel_thickness=4;  // how thick the reel hub should be
 
-wheel_axel_bore_diameter=5.4;  // the size of the hole in the hub (for the axle)
+wheel_axle_bore_diameter=5.4;  // the size of the hole in the hub (for the axle)
 
 
-wheel_axel_bearing_diameter=6.4;
+wheel_axle_bearing_diameter=6.4;
 bearing_height=3;
 
 facetHeight = cos(((10-2)*180)/10/2)*(wheel_dia/2)*2;
@@ -71,8 +71,8 @@ module testBearingCountersink()
     difference()
     {
         cylinder(d=15, h=10, $fn=30);
-        translate([0,0,10-bearing_height+.001]) cylinder(d=wheel_axel_bearing_diameter, h=bearing_height, $fn=30);
-        translate([0,0,-.5]) cylinder(d=wheel_axel_bore_diameter, h=wheel_height+1, $fn=30);   
+        translate([0,0,10-bearing_height+.001]) cylinder(d=wheel_axle_bearing_diameter, h=bearing_height, $fn=30);
+        translate([0,0,-.5]) cylinder(d=wheel_axle_bore_diameter, h=wheel_height+1, $fn=30);   
     }
 }
 
@@ -141,7 +141,7 @@ module reel()
             // 60 teeth = 6 teeth/digit
             mygear($fn=20,
                 number_of_teeth=gearTeeth, 
-                bore_diameter=wheel_axel_bore_diameter,
+                bore_diameter=wheel_axle_bore_diameter,
                 hub_thickness=0,
                 rim_thickness = 8,      // how thick the 'tire' of the gear will be
                 gear_thickness = 8      // how thick the inner-wheel will be
@@ -177,8 +177,8 @@ module reel()
             }
             
         // axle bearings
-        translate([0,0,-.001]) cylinder(d=wheel_axel_bearing_diameter, h=bearing_height, $fn=30);
-        translate([0,0,wheel_height-bearing_height+.001]) cylinder(d=wheel_axel_bearing_diameter, h=bearing_height, $fn=30);
+        translate([0,0,-.001]) cylinder(d=wheel_axle_bearing_diameter, h=bearing_height, $fn=30);
+        translate([0,0,wheel_height-bearing_height+.001]) cylinder(d=wheel_axle_bearing_diameter, h=bearing_height, $fn=30);
 
     }
     
@@ -209,7 +209,7 @@ module wheel()
                 difference()
                 {
                     cylinder(d=wheel_inner_dia-10, h=wheel_height+1, $fn=10);       // hollow decagon
-                    cylinder(d=wheel_axel_bore_diameter+10+10, h=wheel_height+20); // axel hub
+                    cylinder(d=wheel_axle_bore_diameter+10+10, h=wheel_height+20); // axle hub
                 }
                 sphere(r=5,$fn=30);     // fillet all of the corners
             }
@@ -221,8 +221,8 @@ module wheel()
             sphere(r=5,$fn=30);
         }
         
-        // the axel bore
-        translate([0,0,-.5]) cylinder(d=wheel_axel_bore_diameter, h=wheel_height+1, $fn=30);   
+        // the axle bore
+        translate([0,0,-.5]) cylinder(d=wheel_axle_bore_diameter, h=wheel_height+1, $fn=30);   
     }
 }
 
