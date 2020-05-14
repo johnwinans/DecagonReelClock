@@ -14,7 +14,8 @@ https://youtu.be/1tYzWID41jc
 
 Part suppliers:
 
-* NEMA 17 stepper motors amazon.com ASIN: B07582D2R8
+* NEMA 17 stepper motors (for 200mm reels) amazon.com ASIN: B07582D2R8
+* 28BYJ-48 stepper motors (for 140mm reels) amazon.com ASIN: B00LPK0E5A
 * 3mm x 150mm axles amazon.com ASIN: B00JR56KI0
 * 3mm bearings amazon.com ASIN: B00ZHSQX42
 * Index magnets amazon.com ASIN: B07CPMQJHF
