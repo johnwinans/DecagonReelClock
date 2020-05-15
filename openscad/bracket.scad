@@ -34,16 +34,12 @@ function pitch_radius(number_of_teeth, circular_pitch) = (number_of_teeth * circ
 BearingOD=10.5;
 BearingThickness=4;
 
-//axleFudge = .1;     // extra space to deal with imperfect gear teeth
-axleFudge = 0;     // extra space to deal with imperfect gear teeth
-
+axleFudge = .1;     // extra space to deal with imperfect gear teeth
 
 // 60 teeth hath the wheel & 8 hath the driver gear for 200mm reels
 //axleSpacing = pitch_radius(68, circular_pitch) + axleFudge;
 // 32+12 teeth for 140mm reels
-axleSpacing = pitch_radius(46, circular_pitch) + axleFudge;
-
-
+axleSpacing = pitch_radius(32+12, circular_pitch) + axleFudge;
 
 echo("axle spacing=", axleSpacing);
 
@@ -121,8 +117,24 @@ module mountingBracket()
 
     // cable retainer
     crd = 6;
-    translate([wallthickness/2+crd/2, 20, wallHeight-10-axleSpacing-axleFudge]) retainer(len=30, rd=crd);
-    translate([0, wallWidth/2+crd/2, 10]) rotate([0,0,-90]) retainer(len=wallHeight-25, rd=crd);
+    
+    translate([wallthickness/2+crd/2, 20, wallHeight-10-axleSpacing-axleFudge]) 
+    {
+        difference()
+        {
+            rotate([0,0,-90]) retainer(len=30, rd=crd);
+            // if we angle the bottom then we don't need support material
+            translate([crd*.9,0,-len/2]) rotate([0,45,0]) cube([crd*2,crd*2,crd*2], center=true);
+        }
+    }
+    translate([0, wallWidth/2+crd/2, 10]) 
+    {
+        difference()
+        {
+            retainer(len=wallHeight-25, rd=crd);
+            translate([0,crd*.9,-len/2]) rotate([45,0,0]) cube([crd*2,crd*2,crd*2], center=true);
+        }
+    }
 }
   
 // A tube for retaining a cable
@@ -135,7 +147,7 @@ module retainer(len, rd=8)
     {
         cylinder(d=rd+th*2, h=len, center=true, $fn=30);
         cylinder(d=rd, h=len+1, center=true, $fn=30);
-        translate([0, rd/2, 0]) cube([1, rd, len+1], center=true);
+        translate([0, rd/2, 0]) cube([2, rd, len+1], center=true);
     }
 }
 
@@ -186,9 +198,10 @@ module motorPos()
     stepper28byj48Pos();
 }
 
+// The positive portion of a 28byj-48 stepper mount
 module stepper28byj48Neg()
 {
-    bracketOffset = 8;          // mounting hols are 87mm offset from center of shaft
+    bracketOffset = 8;          // mounting holes are 8mm offset from center of shaft
     bracketSpacing = 35/2;      // mounting holes spacing is 35mm on center
     
     rotate([0,90,0]) cylinder(d=25, h=100, center=true, $fn=30);
@@ -198,15 +211,15 @@ module stepper28byj48Neg()
         for ( y = [ -bracketSpacing, bracketSpacing ])
         {
             // bolt holes
-            translate([0,y,0]) rotate([0,-90,0]) cylinder(d=3.8, h=100, center=false, $fn=30);
+            translate([0,y,0]) rotate([0,-90,0]) cylinder(d=3.5, h=40, center=true, $fn=20);
             // countersinks
-            translate([-5, y, 0]) rotate([0,-90,0]) cylinder(d=6.5, h=100, center=false, $fn=30);
-            // guides to align the motor on center if use bolts that are too small
-//#            translate([0,y,-bracketWith/2-1]) cube([2,4,2], center=true);
+            translate([-5, y, 0]) rotate([0,-90,0])
+            cylinder(d=6.6, h=10, $fn=6);
         }
-        //#slottedNotch();
     }
 }
+
+// The negative portion of a 28byj-48 stepper mount
 module stepper28byj48Pos()
 {
     bracketOffset = 8;
@@ -218,7 +231,7 @@ module stepper28byj48Pos()
 module slottedNotch()
 {
     bracketSpacing = 35/2;      // offset from center to the bracket mounting holes
-    bracketWith = 7.2;          // the width of the mounting brackets 
+    bracketWith = 7.3;          // the width of the mounting brackets 
     bracketLength = 42;         // the total outer length of the brackets
     motorHousingDiameter = 29;
     
@@ -230,7 +243,6 @@ module slottedNotch()
             translate([0,-bracketSpacing,0]) rotate([0,90,0]) cylinder(d=bracketWith+6, h=2, center=true, $fn=30);
         }
 
-    //    cube([2,bracketLength+4,bracketWith+4], center=true);
         hull()
         {
             translate([0,bracketSpacing,0]) rotate([0,90,0]) cylinder(d=bracketWith, h=3, center=true, $fn=30);
