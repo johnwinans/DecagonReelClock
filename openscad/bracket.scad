@@ -56,7 +56,8 @@ module mountingBracket()
     
     wallCornerRad = 15;
     wallthickness = 10; // 13=NEMA17, 10=28BYJ-48
-    wallWidth = 75;
+    //wallWidth = 75;
+    wallWidth = 52;
     wallHeight = 95;   // larger wheel = 130;
     wheel_dia = 140;    // NEMA17 = 200;
     footWidth = 50;
@@ -108,8 +109,8 @@ module mountingBracket()
             rotate([-360/20,0,0]) 
                 translate([0,0,-(sensorRadius)])
                 {
-                    translate([0,0,-3]) cube([4,5,15], center=true);
-                    translate([0,0,2]) rotate([0,90,0]) cylinder(d=4, h=40, center=true, $fn=20);
+                    translate([0,0,0]) cube([4,5,15], center=true);
+                    translate([0,0,5]) rotate([0,90,0]) cylinder(d=4, h=40, center=true, $fn=20);
                 }
 
 //                rotate([0,-90,0]) cylinder(d=5, h=100, center=false, $fn=30); // index magnet
@@ -117,7 +118,28 @@ module mountingBracket()
 
     }
     translate([wallthickness/2+.002,0,wallHeight-10-axleSpacing-axleFudge]) motorPos();
+
+    // cable retainer
+    crd = 6;
+    translate([wallthickness/2+crd/2, 20, wallHeight-10-axleSpacing-axleFudge]) retainer(len=30, rd=crd);
+    translate([0, wallWidth/2+crd/2, 10]) rotate([0,0,-90]) retainer(len=wallHeight-25, rd=crd);
 }
+  
+// A tube for retaining a cable
+module retainer(len, rd=8)
+{
+    th = 1.25;  // wall thickness
+    
+    translate([0,0,len/2])
+    difference()
+    {
+        cylinder(d=rd+th*2, h=len, center=true, $fn=30);
+        cylinder(d=rd, h=len+1, center=true, $fn=30);
+        translate([0, rd/2, 0]) cube([1, rd, len+1], center=true);
+    }
+}
+
+
 
 axleDia=3.5;
 // the parts that require removing for an axle mount
